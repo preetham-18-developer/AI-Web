@@ -13,7 +13,7 @@ import { Booking } from './components/Booking';
 import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import { BookingSuccess } from './components/BookingSuccess';
-import { Admin } from './components/Admin';
+
 import { FloatingSocial } from './components/FloatingSocial';
 
 const Home = () => {
@@ -44,7 +44,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/booking-success" element={<BookingSuccess />} />
-        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   );
