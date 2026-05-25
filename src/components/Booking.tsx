@@ -227,7 +227,8 @@ export const Booking = () => {
       const priceInRupees = getPriceFromPlan(formData.selectedPlan); // e.g. 1999
       const priceInPaise = priceInRupees * 100; // e.g. 199900
 
-      const orderRes = await axios.post('/api/create-order', {
+      const API_URL = import.meta.env.VITE_API_BASE_URL || '';
+      const orderRes = await axios.post(`${API_URL}/api/create-order`, {
         amount: priceInPaise,
         planName: formData.selectedPlan,
         customerName: formData.fullName,
