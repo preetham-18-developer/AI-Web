@@ -183,7 +183,6 @@ export const Booking = () => {
             const dateKey = `${format(selectedDate, 'yyyy-MM-dd')}-${time}`;
             const bookedCount = MOCK_BOOKINGS[dateKey] || 0;
             const isFullyBooked = bookedCount >= TEAM_CAPACITY;
-            const isPartial = bookedCount > 0 && bookedCount < TEAM_CAPACITY;
             const isSelected = selectedTime === time;
 
             return (
