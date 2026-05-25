@@ -38,11 +38,7 @@ const TIME_SLOTS = [
 
 // Mock capacity for demonstration
 const TEAM_CAPACITY = 3;
-const MOCK_BOOKINGS: Record<string, number> = {
-  // "YYYY-MM-DD-HH:MM AM": count
-  "2026-05-25-4:00 PM": 3, // Fully booked
-  "2026-05-25-5:00 PM": 1, // Partially booked
-};
+const MOCK_BOOKINGS: Record<string, number> = {};
 
 export const Booking = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -205,11 +201,6 @@ export const Booking = () => {
                 title={isFullyBooked ? 'Fully Booked' : ''}
               >
                 {time}
-                {isPartial && !isSelected && (
-                  <span className="absolute -top-2 -right-2 bg-gold text-black text-[9px] font-bold px-1.5 py-0.5 rounded-full z-10">
-                    Team Available
-                  </span>
-                )}
               </button>
             );
           })}
@@ -267,7 +258,16 @@ export const Booking = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handler: (response: any) => {
           // Payment success
-          navigate(`/booking-success?id=${response.razorpay_order_id}`);
+          navigate(`/booking-success?id=${response.razorpay_order_id}`, {
+            state: {
+              date: selectedDate,
+              time: selectedTime,
+              plan: formData.selectedPlan,
+              videoType: formData.videoType,
+              amount: priceInRupees,
+              name: formData.fullName
+            }
+          });
         },
         modal: {
           ondismiss: () => {

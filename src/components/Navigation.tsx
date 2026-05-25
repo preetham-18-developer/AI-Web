@@ -21,7 +21,8 @@ export const Navigation = () => {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 bg-[#0a0a0c]/85 backdrop-blur-[16px] saturate-[180%] ${scrolled ? 'border-b border-border' : ''}`}>
+    <>
+      <nav className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-200 bg-[#0a0a0c]/85 backdrop-blur-[16px] saturate-[180%] ${scrolled ? 'border-b border-border' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-[56px] md:h-[64px]">
           
@@ -60,6 +61,7 @@ export const Navigation = () => {
           </div>
         </div>
       </div>
+      </nav>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
@@ -69,7 +71,7 @@ export const Navigation = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden fixed inset-0 top-[56px] bg-[#0a0a0c]/97 z-40 flex flex-col px-6 pt-8 space-y-6"
+            className="md:hidden fixed inset-0 top-[56px] bg-bg z-[55] flex flex-col px-6 pt-8 space-y-6"
           >
             {[...links, { name: 'Book a Session', href: '#book' }].map((link, i) => (
               <motion.a
@@ -87,6 +89,6 @@ export const Navigation = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
 };
