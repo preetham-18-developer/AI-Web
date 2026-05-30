@@ -48,6 +48,7 @@ export const Navigation = () => {
     { name: 'Portfolio', href: '#portfolio' },
     { name: 'About', href: '#about' },
     { name: 'Pricing', href: '#pricing' },
+    { name: 'FAQ', href: '#faq' },
   ];
 
   return (
