@@ -114,8 +114,19 @@ if (feedbackCount.count === 0) {
   defaultFeedbacks.forEach(f => insertFeedback.run(f));
 }
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://ai-web-puce-nine.vercel.app'
+];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS policy violation'), false);
+  },
   credentials: true
 }));
 
