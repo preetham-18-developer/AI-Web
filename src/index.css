@@ -22,23 +22,25 @@
 
 @layer base {
   :root {
-    --color-bg: #0A0A0C;
-    --color-surface: #111114;
-    --color-surface-2: #1A1A1F;
-    --color-border: rgba(255, 255, 255, 0.07);
-    --color-accent: #E8622A;
-    --color-accent-soft: rgba(232, 98, 42, 0.12);
-    --color-gold: #C9A84C;
-    --color-gold-soft: rgba(201, 168, 76, 0.10);
-    --color-text-primary: #F2EDE8;
-    --color-text-secondary: #9B9490;
-    --color-text-muted: #5C5855;
+    --color-bg: #050505;
+    --color-surface: #111111;
+    --color-surface-2: #1A1A24;
+    --color-border: rgba(255, 255, 255, 0.08);
+    --color-accent: #2563EB; /* Thunder Blue accent */
+    --color-accent-soft: rgba(37, 99, 235, 0.15);
+    --color-gold: #60A5FA;
+    --color-gold-soft: rgba(96, 165, 250, 0.10);
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #A1A1AA;
+    --color-text-muted: #52525B;
     --color-success: #2ECC71;
     --color-danger: #E74C3C;
   }
 
   body {
-    background-color: var(--color-bg);
+    background: linear-gradient(180deg, #09132b 0%, #050505 100%);
+    background-color: var(--color-bg); /* fallback */
+    background-attachment: fixed;
     color: var(--color-text-primary);
     font-family: "DM Sans", sans-serif;
     -webkit-font-smoothing: antialiased;

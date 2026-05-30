@@ -136,7 +136,7 @@ export const FAQ = () => {
         >
           <p className="font-body text-[15px] text-text-secondary">Still have a question?</p>
           <a
-            href="https://wa.me/917893287376?text=Hi%20Salman%2C%20I%20have%20a%20question%20about%20booking%20a%20session."
+            href="https://wa.me/917893287376?text=Hi%20Shotzy%20Hub%2C%20I%20have%20a%20question%20about%20booking%20a%20session."
             target="_blank"
             rel="noreferrer"
             className="h-[44px] px-6 bg-transparent border border-accent text-accent rounded-lg font-body font-semibold text-[14px] flex items-center justify-center hover:bg-accent-soft transition-all duration-200"

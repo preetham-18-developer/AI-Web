@@ -19,7 +19,7 @@ export const FloatingSocial = () => {
       </motion.a>
 
       <motion.a
-        href="https://wa.me/917893287376?text=Hi%20Salman%2C%20I%27m%20interested%20in%20booking%20a%20video%20editing%20session!"
+        href="https://wa.me/917893287376?text=Hi%20Shotzy%20Hub%2C%20I%27m%20interested%20in%20booking%20a%20video%20editing%20session!"
         target="_blank"
         rel="noreferrer"
         initial={{ x: 80, opacity: 0 }}

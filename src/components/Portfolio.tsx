@@ -1,14 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-
-const PORTFOLIO_REELS = [
-  { id: 1, embedUrl: "https://www.instagram.com/p/DYPxeaKuhc9/embed/", label: "AI Edit #1" },
-  { id: 2, embedUrl: "https://www.instagram.com/p/DYglCeESaDi/embed/", label: "AI Edit #2" },
-  { id: 3, embedUrl: "https://www.instagram.com/p/DVMjiDhE-Yg/embed/", label: "AI Edit #3" },
-  { id: 4, embedUrl: "https://www.instagram.com/p/DYmcKdZotSD/embed/", label: "AI Edit #4" },
-  { id: 5, embedUrl: "https://www.instagram.com/p/DWwKCTbCB5f/embed/", label: "AI Edit #5" },
-  { id: 6, embedUrl: "https://www.instagram.com/p/DV3ZOqwiJ-D/embed/", label: "AI Edit #6" }
-];
+import axios from 'axios';
 
 const ReelCard = ({ embedUrl, label, index }: { embedUrl: string, label: string, index: number }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -103,7 +95,30 @@ const ReelCard = ({ embedUrl, label, index }: { embedUrl: string, label: string,
   );
 };
 
+interface Reel {
+  id: number;
+  embed_url: string;
+  label: string;
+}
+
 export const Portfolio = () => {
+  const [reels, setReels] = useState<Reel[]>([]);
+
+  useEffect(() => {
+    const fetchReels = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_BASE_URL || '';
+        const res = await axios.get(`${API_URL}/api/reels`);
+        if (res.data.success) {
+          setReels(res.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load portfolio reels:', err);
+      }
+    };
+    fetchReels();
+  }, []);
+
   return (
     <section id="portfolio" className="py-24 bg-bg relative border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -138,8 +153,8 @@ export const Portfolio = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {PORTFOLIO_REELS.map((reel, index) => (
-            <ReelCard key={reel.id} embedUrl={reel.embedUrl} label={reel.label} index={index} />
+          {reels.map((reel, index) => (
+            <ReelCard key={reel.id} embedUrl={reel.embed_url} label={reel.label} index={index} />
           ))}
         </div>
         

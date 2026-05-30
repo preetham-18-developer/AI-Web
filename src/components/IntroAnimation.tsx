@@ -34,31 +34,30 @@ export const IntroAnimation = () => {
               initial={{ scale: 0, rotate: -180, opacity: 0 }}
               animate={{ scale: 1, rotate: 0, opacity: 1 }}
               transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-              className="relative w-16 h-16 md:w-20 md:h-20 flex items-center justify-center"
+              className="relative w-16 h-16 md:w-20 md:h-20 flex items-center justify-center select-none"
             >
               <div className="absolute inset-0 border-[3px] border-accent/20 rounded-2xl rotate-45 transition-transform" />
               <div className="absolute inset-0 border-[3px] border-accent rounded-2xl -rotate-12 transition-transform" />
-              <span className="font-display text-4xl md:text-5xl text-accent font-bold z-10 drop-shadow-lg">S</span>
+              <span className="font-display text-4xl md:text-5xl text-accent font-bold z-10 drop-shadow-[0_0_10px_rgba(37,99,235,0.7)]">⚡</span>
             </motion.div>
 
             {/* Typography Reveal */}
-            <div className="flex flex-col items-center md:items-start overflow-hidden leading-none pb-2">
-              <div className="flex gap-3 overflow-hidden">
+            <div className="flex flex-col items-center md:items-start overflow-hidden leading-none pb-2 select-none">
+              <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
                 <motion.div
                   initial={{ y: "100%", opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="font-display text-5xl md:text-7xl lg:text-8xl text-text-primary tracking-tight font-bold"
+                  className="font-body text-5xl md:text-7xl lg:text-8xl text-text-primary tracking-tight font-extrabold drop-shadow-[0_0_20px_rgba(37,99,235,0.35)] flex items-center gap-0"
                 >
-                  Salman
-                </motion.div>
-                <motion.div
-                  initial={{ y: "100%", opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="font-display text-5xl md:text-7xl lg:text-8xl text-accent tracking-tight font-bold"
-                >
-                  AI
+                  SHOT
+                  <svg 
+                    className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 text-[#38bdf8] drop-shadow-[0_0_25px_rgba(56,189,248,0.95)] animate-pulse fill-current mx-[-3px] md:mx-[-5px] mt-[-2px] md:mt-[-4px]" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                  </svg>
+                  Y HUB
                 </motion.div>
               </div>
             </div>

@@ -52,7 +52,7 @@ export const Booking = () => {
     resolver: zodResolver(schema),
     mode: 'onChange',
     defaultValues: {
-      selectedPlan: "Starter – ₹1,999"
+      selectedPlan: "Hourly Plan – ₹1,999"
     }
   });
 
@@ -222,69 +222,42 @@ export const Booking = () => {
     try {
       setIsSubmitting(true);
 
-      // Amount must be in PAISE — multiply ₹ amount by 100
       const priceInRupees = getPriceFromPlan(formData.selectedPlan); // e.g. 1999
-      const priceInPaise = priceInRupees * 100; // e.g. 199900
-
       const API_URL = import.meta.env.VITE_API_BASE_URL || '';
-      const orderRes = await axios.post(`${API_URL}/api/create-order`, {
-        amount: priceInPaise,
-        planName: formData.selectedPlan,
-        customerName: formData.fullName,
-        customerEmail: formData.email,
-        customerPhone: formData.phone,
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+
+      const res = await axios.post(`${API_URL}/api/bookings`, {
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        plan: formData.selectedPlan,
+        video_type: formData.videoType,
+        date: dateStr,
+        time: selectedTime,
+        description: formData.description,
+        amount: priceInRupees,
+        status: 'PENDING_APPROVAL'
       });
 
-      if (!orderRes.data.success) {
-        throw new Error(orderRes.data.error || 'Failed to create order');
+      if (!res.data.success) {
+        throw new Error(res.data.error || 'Failed to submit booking request');
       }
 
-      const { order_id, key } = orderRes.data.data;
+      const bookingId = res.data.data?.id || `REQ-${Date.now()}`;
 
-      // Open Razorpay checkout
-      const options = {
-        key,
-        amount: priceInPaise,
-        currency: 'INR',
-        name: 'Salman AI Video Editing',
-        description: formData.selectedPlan,
-        order_id,
-        prefill: {
+      navigate(`/booking-success?id=${bookingId}`, {
+        state: {
+          date: selectedDate,
+          time: selectedTime,
+          plan: formData.selectedPlan,
+          videoType: formData.videoType,
+          amount: priceInRupees,
           name: formData.fullName,
+          description: formData.description,
           email: formData.email,
-          contact: `91${formData.phone}`,
-        },
-        theme: { color: '#E8622A' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        handler: (response: any) => {
-          // Payment success
-          navigate(`/booking-success?id=${response.razorpay_order_id}`, {
-            state: {
-              date: selectedDate,
-              time: selectedTime,
-              plan: formData.selectedPlan,
-              videoType: formData.videoType,
-              amount: priceInRupees,
-              name: formData.fullName
-            }
-          });
-        },
-        modal: {
-          ondismiss: () => {
-            setIsSubmitting(false); // re-enable form if user closes modal
-          }
+          isRequest: true
         }
-      };
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rzp = new (window as any).Razorpay(options);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      rzp.on('payment.failed', (response: any) => {
-        console.error('[Razorpay] Payment failed:', response.error);
-        showToast('Payment failed. Please try again.', 'error');
-        setIsSubmitting(false);
       });
-      rzp.open();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -363,9 +336,9 @@ export const Booking = () => {
                       {...register("selectedPlan")}
                       className={`w-full h-12 bg-surface-2 border ${errors.selectedPlan ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none appearance-none transition-all duration-200`}
                     >
-                      <option value="Starter – ₹1,999">Starter – ₹1,999</option>
-                      <option value="Growth – ₹3,999">Growth – ₹3,999</option>
-                      <option value="Pro – ₹7,499">Pro – ₹7,499</option>
+                      <option value="Hourly Plan – ₹1,999">Hourly Plan – ₹1,999</option>
+                      <option value="Half Day Plan – ₹4,999">Half Day Plan – ₹4,999</option>
+                      <option value="Full Event – ₹10,000">Full Event – ₹10,000</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-text-secondary">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -434,10 +407,10 @@ export const Booking = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Processing...
+                    Submitting...
                   </>
                 ) : (
-                  "Confirm & Pay " + (selectedPlanValue ? "₹" + selectedPlanValue.split('₹')[1] : "")
+                  "Submit Booking Request"
                 )}
               </button>
 
