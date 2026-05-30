@@ -48,6 +48,23 @@ export const Booking = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<{ message: string, type: 'error' | 'success' } | null>(null);
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isValid } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -376,128 +393,153 @@ export const Booking = () => {
             </AnimatePresence>
           </div>
 
-          {/* Right Column: Form */}
-          <div className="lg:col-span-7 bg-surface border border-border rounded-2xl p-6 md:p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block font-body text-[13px] text-text-secondary mb-2">Full Name</label>
-                  <input
-                    {...register("fullName")}
-                    className={`w-full h-12 bg-surface-2 border ${errors.fullName ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none transition-all duration-200`}
-                    placeholder="John Doe"
-                  />
-                  {errors.fullName && <p className="mt-1 font-body text-[12px] text-danger">{errors.fullName.message}</p>}
+          {/* Right Column: Form or Sign In Prompt */}
+          <div className="lg:col-span-7 bg-surface border border-border rounded-2xl p-6 md:p-8 flex flex-col justify-center min-h-[420px]">
+            {isAuthenticated ? (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block font-body text-[13px] text-text-secondary mb-2">Full Name</label>
+                    <input
+                      {...register("fullName")}
+                      className={`w-full h-12 bg-surface-2 border ${errors.fullName ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none transition-all duration-200`}
+                      placeholder="John Doe"
+                    />
+                    {errors.fullName && <p className="mt-1 font-body text-[12px] text-danger">{errors.fullName.message}</p>}
+                  </div>
+                  <div>
+                    <label className="block font-body text-[13px] text-text-secondary mb-2">Email Address</label>
+                    <input
+                      {...register("email")}
+                      className={`w-full h-12 bg-surface-2 border ${errors.email ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none transition-all duration-200`}
+                      placeholder="john@example.com"
+                    />
+                    {errors.email && <p className="mt-1 font-body text-[12px] text-danger">{errors.email.message}</p>}
+                  </div>
                 </div>
-                <div>
-                  <label className="block font-body text-[13px] text-text-secondary mb-2">Email Address</label>
-                  <input
-                    {...register("email")}
-                    className={`w-full h-12 bg-surface-2 border ${errors.email ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none transition-all duration-200`}
-                    placeholder="john@example.com"
-                  />
-                  {errors.email && <p className="mt-1 font-body text-[12px] text-danger">{errors.email.message}</p>}
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block font-body text-[13px] text-text-secondary mb-2">Phone Number</label>
-                  <input
-                    {...register("phone")}
-                    className={`w-full h-12 bg-surface-2 border ${errors.phone ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none transition-all duration-200`}
-                    placeholder="9876543210"
-                    maxLength={10}
-                  />
-                  {errors.phone && <p className="mt-1 font-body text-[12px] text-danger">{errors.phone.message}</p>}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block font-body text-[13px] text-text-secondary mb-2">Phone Number</label>
+                    <input
+                      {...register("phone")}
+                      className={`w-full h-12 bg-surface-2 border ${errors.phone ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none transition-all duration-200`}
+                      placeholder="9876543210"
+                      maxLength={10}
+                    />
+                    {errors.phone && <p className="mt-1 font-body text-[12px] text-danger">{errors.phone.message}</p>}
+                  </div>
+                  <div>
+                    <label className="block font-body text-[13px] text-text-secondary mb-2">Selected Plan</label>
+                    <div className="relative">
+                      <select
+                        {...register("selectedPlan")}
+                        className={`w-full h-12 bg-surface-2 border ${errors.selectedPlan ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none appearance-none transition-all duration-200`}
+                      >
+                        <option value="Hourly Plan – ₹1,999">Hourly Plan – ₹1,999</option>
+                        <option value="Half Day Plan – ₹4,999">Half Day Plan – ₹4,999</option>
+                        <option value="Full Event – ₹10,000">Full Event – ₹10,000</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-text-secondary">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                      </div>
+                    </div>
+                    {errors.selectedPlan && <p className="mt-1 font-body text-[12px] text-danger">{errors.selectedPlan.message}</p>}
+                  </div>
                 </div>
+
                 <div>
-                  <label className="block font-body text-[13px] text-text-secondary mb-2">Selected Plan</label>
+                  <label className="block font-body text-[13px] text-text-secondary mb-2">Type of Video</label>
                   <div className="relative">
                     <select
-                      {...register("selectedPlan")}
-                      className={`w-full h-12 bg-surface-2 border ${errors.selectedPlan ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none appearance-none transition-all duration-200`}
+                      {...register("videoType")}
+                      className={`w-full h-12 bg-surface-2 border ${errors.videoType ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none appearance-none transition-all duration-200`}
                     >
-                      <option value="Hourly Plan – ₹1,999">Hourly Plan – ₹1,999</option>
-                      <option value="Half Day Plan – ₹4,999">Half Day Plan – ₹4,999</option>
-                      <option value="Full Event – ₹10,000">Full Event – ₹10,000</option>
+                      <option value="Instagram Reel">Instagram Reel</option>
+                      <option value="YouTube Short">YouTube Short</option>
+                      <option value="Brand Promo Video">Brand Promo Video</option>
+                      <option value="AI Avatar Video">AI Avatar Video</option>
+                      <option value="Other">Other</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-text-secondary">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                   </div>
-                  {errors.selectedPlan && <p className="mt-1 font-body text-[12px] text-danger">{errors.selectedPlan.message}</p>}
                 </div>
-              </div>
 
-              <div>
-                <label className="block font-body text-[13px] text-text-secondary mb-2">Type of Video</label>
-                <div className="relative">
-                  <select
-                    {...register("videoType")}
-                    className={`w-full h-12 bg-surface-2 border ${errors.videoType ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg px-4 font-body text-[14px] text-text-primary outline-none appearance-none transition-all duration-200`}
-                  >
-                    <option value="Instagram Reel">Instagram Reel</option>
-                    <option value="YouTube Short">YouTube Short</option>
-                    <option value="Brand Promo Video">Brand Promo Video</option>
-                    <option value="AI Avatar Video">AI Avatar Video</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-text-secondary">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="block font-body text-[13px] text-text-secondary">Brief / Description</label>
+                    <span className="font-body text-[12px] text-text-muted">{descriptionValue.length}/500</span>
                   </div>
+                  <textarea
+                    {...register("description")}
+                    rows={4}
+                    className={`w-full bg-surface-2 border ${errors.description ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg p-4 font-body text-[14px] text-text-primary outline-none resize-none transition-all duration-200`}
+                    placeholder="Tell us about the project, the vibe you're going for, reference links, etc."
+                  />
+                  {errors.description && <p className="mt-1 font-body text-[12px] text-danger">{errors.description.message}</p>}
                 </div>
-              </div>
 
-              <div>
-                <div className="flex justify-between mb-2">
-                  <label className="block font-body text-[13px] text-text-secondary">Brief / Description</label>
-                  <span className="font-body text-[12px] text-text-muted">{descriptionValue.length}/500</span>
-                </div>
-                <textarea
-                  {...register("description")}
-                  rows={4}
-                  className={`w-full bg-surface-2 border ${errors.description ? 'border-danger' : 'border-border focus:border-accent focus:shadow-[0_0_0_3px_rgba(232,98,42,0.12)]'} rounded-lg p-4 font-body text-[14px] text-text-primary outline-none resize-none transition-all duration-200`}
-                  placeholder="Tell us about the project, the vibe you're going for, reference links, etc."
-                />
-                {errors.description && <p className="mt-1 font-body text-[12px] text-danger">{errors.description.message}</p>}
-              </div>
-
-              {selectedDate && selectedTime && (
-                <div className="bg-accent-soft border border-accent/30 rounded-lg p-4 flex items-center justify-between">
-                  <div className="font-body text-[14px] text-text-primary">
-                    <span className="text-text-secondary mr-2">Selected:</span>
-                    {format(selectedDate, 'EEEE, d MMMM yyyy')} · {selectedTime}
+                {selectedDate && selectedTime && (
+                  <div className="bg-accent-soft border border-accent/30 rounded-lg p-4 flex items-center justify-between">
+                    <div className="font-body text-[14px] text-text-primary">
+                      <span className="text-text-secondary mr-2">Selected:</span>
+                      {format(selectedDate, 'EEEE, d MMMM yyyy')} · {selectedTime}
+                    </div>
+                    <button type="button" onClick={() => setSelectedTime(null)} className="text-accent text-[13px] font-semibold hover:underline">Change</button>
                   </div>
-                  <button type="button" onClick={() => setSelectedTime(null)} className="text-accent text-[13px] font-semibold hover:underline">Change</button>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={!isValid || !selectedDate || !selectedTime || isSubmitting}
-                className={`w-full h-[52px] rounded-lg font-body font-semibold text-[15px] flex items-center justify-center transition-all duration-300
-                  ${!isValid || !selectedDate || !selectedTime || isSubmitting
-                    ? 'bg-surface-2 text-text-muted border border-border cursor-not-allowed'
-                    : 'bg-accent text-white hover:brightness-110 hover:shadow-[0_0_20px_rgba(232,98,42,0.3)]'
-                  }
-                `}
-              >
-                {isSubmitting ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Submitting...
-                  </>
-                ) : (
-                  "Confirm & Pay " + (selectedPlanValue ? "₹" + selectedPlanValue.split('₹')[1] : "")
                 )}
-              </button>
 
-            </form>
+                <button
+                  type="submit"
+                  disabled={!isValid || !selectedDate || !selectedTime || isSubmitting}
+                  className={`w-full h-[52px] rounded-lg font-body font-semibold text-[15px] flex items-center justify-center transition-all duration-300
+                    ${!isValid || !selectedDate || !selectedTime || isSubmitting
+                      ? 'bg-surface-2 text-text-muted border border-border cursor-not-allowed'
+                      : 'bg-accent text-white hover:brightness-110 hover:shadow-[0_0_20px_rgba(232,98,42,0.3)]'
+                    }
+                  `}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Submitting...
+                    </>
+                  ) : (
+                    "Confirm & Pay " + (selectedPlanValue ? "₹" + selectedPlanValue.split('₹')[1] : "")
+                  )}
+                </button>
+
+              </form>
+            ) : (
+              <div className="text-center py-8 px-4 flex flex-col items-center justify-center space-y-6">
+                <div className="w-16 h-16 bg-accent-soft border border-accent/20 rounded-full flex items-center justify-center text-accent shadow-[0_0_20px_rgba(232,98,42,0.15)] animate-pulse">
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-[22px] text-text-primary mb-2">
+                    Sign In to Book a Session
+                  </h3>
+                  <p className="font-body text-[14px] text-text-secondary max-w-sm mx-auto leading-relaxed">
+                    To select slots, view plan prices, and schedule your video session, please sign in or create a client account.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  className="px-8 py-3.5 bg-accent hover:brightness-110 hover:shadow-[0_0_20px_rgba(232,98,42,0.3)] text-white font-body font-semibold text-[14px] rounded-xl transition-all duration-300 cursor-pointer"
+                >
+                  Sign In to Book Now
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
