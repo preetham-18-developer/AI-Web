@@ -122,6 +122,11 @@ Looking forward to it!`;
               if (!bookingsError && bookingsData) {
                 setBookings(bookingsData);
               }
+
+              // Auto refresh the page after 1.5 seconds to ensure UI updates cleanly
+              setTimeout(() => {
+                window.location.reload();
+              }, 1500);
             }
           } catch (err) {
             console.error('Failed to update booking status after payment:', err);
