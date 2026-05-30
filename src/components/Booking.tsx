@@ -58,6 +58,7 @@ export const Booking = () => {
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const descriptionValue = watch("description") || "";
+  const selectedPlanValue = watch("selectedPlan") || "";
 
   useEffect(() => {
     const handleSelectPlan = (e: Event) => {
@@ -222,41 +223,101 @@ export const Booking = () => {
       setIsSubmitting(true);
 
       const priceInRupees = getPriceFromPlan(formData.selectedPlan); // e.g. 1999
+      const priceInPaise = priceInRupees * 100;
       const API_URL = import.meta.env.VITE_API_BASE_URL || '';
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
 
-      const res = await axios.post(`${API_URL}/api/bookings`, {
-        name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        plan: formData.selectedPlan,
-        video_type: formData.videoType,
-        date: dateStr,
-        time: selectedTime,
-        description: formData.description,
-        amount: priceInRupees,
-        status: 'PENDING_APPROVAL'
+      // 1. Create Razorpay order
+      const orderRes = await axios.post(`${API_URL}/api/create-order`, {
+        amount: priceInPaise,
+        planName: formData.selectedPlan,
+        customerName: formData.fullName,
+        customerEmail: formData.email,
+        customerPhone: formData.phone,
       });
 
-      if (!res.data.success) {
-        throw new Error(res.data.error || 'Failed to submit booking request');
+      if (!orderRes.data.success) {
+        throw new Error(orderRes.data.error || 'Failed to create payment order');
       }
 
-      const bookingId = res.data.data?.id || `REQ-${Date.now()}`;
+      const { order_id, key } = orderRes.data.data;
 
-      navigate(`/booking-success?id=${bookingId}`, {
-        state: {
-          date: selectedDate,
-          time: selectedTime,
-          plan: formData.selectedPlan,
-          videoType: formData.videoType,
-          amount: priceInRupees,
+      // 2. Open Razorpay Checkout modal
+      const options = {
+        key,
+        amount: priceInPaise,
+        currency: 'INR',
+        name: 'SHOTZY HUB',
+        description: formData.selectedPlan,
+        order_id,
+        prefill: {
           name: formData.fullName,
-          description: formData.description,
           email: formData.email,
-          isRequest: true
+          contact: `91${formData.phone}`,
+        },
+        theme: { color: '#E8622A' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        handler: async (paymentResponse: any) => {
+          try {
+            // Save booking to DB here with status: 'PAID'
+            const res = await axios.post(`${API_URL}/api/bookings`, {
+              name: formData.fullName,
+              email: formData.email,
+              phone: formData.phone,
+              plan: formData.selectedPlan,
+              video_type: formData.videoType,
+              date: dateStr,
+              time: selectedTime,
+              description: formData.description,
+              amount: priceInRupees,
+              status: 'PAID'
+            });
+
+            if (!res.data.success) {
+              throw new Error(res.data.error || 'Failed to record paid booking');
+            }
+
+            const bookingId = res.data.data?.id || paymentResponse.razorpay_order_id || order_id;
+
+            navigate(`/booking-success?id=${bookingId}`, {
+              state: {
+                date: selectedDate,
+                time: selectedTime,
+                plan: formData.selectedPlan,
+                videoType: formData.videoType,
+                amount: priceInRupees,
+                name: formData.fullName,
+                description: formData.description,
+                email: formData.email,
+                isRequest: false
+              }
+            });
+          } catch (err: any) {
+            console.error('[onSubmit handler] Error:', err);
+            showToast(
+              err?.response?.data?.error || err.message || 'Payment was successful but failed to save booking. Please contact support.',
+              'error'
+            );
+          } finally {
+            setIsSubmitting(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsSubmitting(false);
+          }
         }
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rzp = new (window as any).Razorpay(options);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      rzp.on('payment.failed', (response: any) => {
+        console.error('[Razorpay] Payment failed:', response.error);
+        showToast('Payment failed. Please try again.', 'error');
+        setIsSubmitting(false);
       });
+      rzp.open();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -409,7 +470,7 @@ export const Booking = () => {
                     Submitting...
                   </>
                 ) : (
-                  "Submit Booking Request"
+                  "Confirm & Pay " + (selectedPlanValue ? "₹" + selectedPlanValue.split('₹')[1] : "")
                 )}
               </button>
 
