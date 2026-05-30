@@ -516,13 +516,21 @@ app.post('/api/bookings', async (req, res) => {
 
     if (error) {
       console.error('[POST /api/bookings] Supabase insert error:', error);
-      return res.status(500).json({ success: false, error: 'Failed to record booking in database' });
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Failed to record booking in database',
+        details: error.message || error
+      });
     }
 
     return res.status(201).json({ success: true, data: data?.[0] });
   } catch (err) {
     console.error('[POST /api/bookings] Error:', err);
-    return res.status(500).json({ success: false, error: 'Internal server error' });
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error',
+      details: err.message || err
+    });
   }
 });
 
