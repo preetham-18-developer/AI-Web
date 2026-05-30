@@ -92,6 +92,26 @@ export const UserProfile = () => {
             if (updateRes.data.success) {
               showToast('Payment Successful! Session booking is now fully active.', 'success');
               
+              // Automatically open WhatsApp details send after payment!
+              const formattedDate = booking.date;
+              const whatsappMessage = `Hi Shotzy Hub, I just completed payment for my session!
+
+*Booking Details:*
+Name: ${booking.name}
+Date & Time: ${formattedDate} at ${booking.time}
+Plan: ${booking.plan}
+Video Type: ${booking.video_type}
+Status: PAID (SECURED)
+Order ID: BKG-${booking.id}
+
+*Project Brief / Description:*
+${booking.description}
+
+Looking forward to it!`;
+
+              const whatsappUrl = `https://wa.me/917893287376?text=${encodeURIComponent(whatsappMessage)}`;
+              window.open(whatsappUrl, '_blank');
+              
               // Refresh user bookings list
               const { data: bookingsData, error: bookingsError } = await supabase
                 .from('bookings')
