@@ -116,7 +116,7 @@ Looking forward to it!`;
               const { data: bookingsData, error: bookingsError } = await supabase
                 .from('bookings')
                 .select('*')
-                .eq('email', profile?.email || booking.email)
+                .ilike('email', profile?.email || booking.email)
                 .order('created_at', { ascending: false });
 
               if (!bookingsError && bookingsData) {
@@ -189,7 +189,7 @@ Looking forward to it!`;
         const { data: bookingsData, error: bookingsError } = await supabase
           .from('bookings')
           .select('*')
-          .eq('email', user.email)
+          .ilike('email', user.email || '')
           .order('created_at', { ascending: false });
 
         if (bookingsError) throw bookingsError;
@@ -210,26 +210,34 @@ Looking forward to it!`;
   // Separate bookings into upcoming vs past history
   const today = startOfDay(new Date());
 
-  const upcomingBookings = bookings.filter((b) => {
+  const parseBookingDate = (dateStr: string): Date => {
     try {
-      const bDate = parseISO(b.date);
-      const isFutureOrToday = !isBefore(bDate, today);
-      const isUpcomingStatus = b.status === 'PAID' || b.status === 'APPROVED_PENDING_PAYMENT' || b.status === 'PENDING_APPROVAL';
-      return isFutureOrToday && isUpcomingStatus;
-    } catch {
-      return b.status === 'PAID' || b.status === 'APPROVED_PENDING_PAYMENT' || b.status === 'PENDING_APPROVAL'; // fallback
+      const parsed = parseISO(dateStr);
+      if (!isNaN(parsed.getTime())) return parsed;
+    } catch (e) {
+      // fallback
     }
+    try {
+      const parsed = new Date(dateStr);
+      if (!isNaN(parsed.getTime())) return parsed;
+    } catch (e) {
+      // fallback
+    }
+    return new Date(); // fallback to today
+  };
+
+  const upcomingBookings = bookings.filter((b) => {
+    const bDate = parseBookingDate(b.date);
+    const isFutureOrToday = !isBefore(bDate, today);
+    const isUpcomingStatus = b.status === 'PAID' || b.status === 'APPROVED_PENDING_PAYMENT' || b.status === 'PENDING_APPROVAL';
+    return isFutureOrToday && isUpcomingStatus;
   });
 
   const pastBookings = bookings.filter((b) => {
-    try {
-      const bDate = parseISO(b.date);
-      const isPast = isBefore(bDate, today);
-      const isPastStatus = b.status === 'DECLINED' || (b.status !== 'PAID' && b.status !== 'APPROVED_PENDING_PAYMENT' && b.status !== 'PENDING_APPROVAL');
-      return isPast || isPastStatus;
-    } catch {
-      return b.status === 'DECLINED' || (b.status !== 'PAID' && b.status !== 'APPROVED_PENDING_PAYMENT' && b.status !== 'PENDING_APPROVAL'); // fallback
-    }
+    const bDate = parseBookingDate(b.date);
+    const isPast = isBefore(bDate, today);
+    const isPastStatus = b.status === 'DECLINED' || (b.status !== 'PAID' && b.status !== 'APPROVED_PENDING_PAYMENT' && b.status !== 'PENDING_APPROVAL');
+    return isPast || isPastStatus;
   });
 
   const getInitials = (name: string) => {
