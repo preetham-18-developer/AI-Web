@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import { 
   format, 
   addMonths, 
@@ -69,6 +70,18 @@ export const Booking = () => {
     };
     window.addEventListener('selectPlan', handleSelectPlan);
     return () => window.removeEventListener('selectPlan', handleSelectPlan);
+  }, [setValue]);
+
+  useEffect(() => {
+    const prefillUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setValue("fullName", session.user.user_metadata?.full_name || "", { shouldValidate: true });
+        setValue("email", session.user.email || "", { shouldValidate: true });
+        setValue("phone", session.user.user_metadata?.phone || "", { shouldValidate: true });
+      }
+    };
+    prefillUser();
   }, [setValue]);
 
   const showToast = (message: string, type: 'error' | 'success') => {
@@ -216,6 +229,16 @@ export const Booking = () => {
   const onSubmit = async (formData: FormData) => {
     if (!selectedDate || !selectedTime) {
       showToast("Please select a date and time slot", "error");
+      return;
+    }
+
+    // Check if user is signed in first
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      showToast("Please sign in or create an account to book a session.", "error");
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
       return;
     }
 
