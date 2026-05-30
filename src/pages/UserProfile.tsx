@@ -85,7 +85,7 @@ export const UserProfile = () => {
         },
         theme: { color: '#E8622A' },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        handler: async (response: any) => {
+        handler: async (_response: any) => {
           try {
             // Update booking status in DB to PAID
             const updateRes = await axios.put(`${API_URL}/api/bookings/${booking.id}/payment-success`);

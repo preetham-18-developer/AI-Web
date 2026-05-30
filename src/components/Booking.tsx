@@ -58,7 +58,6 @@ export const Booking = () => {
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const descriptionValue = watch("description") || "";
-  const selectedPlanValue = watch("selectedPlan");
 
   useEffect(() => {
     const handleSelectPlan = (e: Event) => {
