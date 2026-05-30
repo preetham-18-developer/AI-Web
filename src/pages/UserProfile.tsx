@@ -267,7 +267,7 @@ ${booking.description}
 Looking forward to it!`;
 
     const whatsappUrl = `https://wa.me/917893287376?text=${encodeURIComponent(whatsappMessage)}`;
-    window.open(whatsappUrl, '_blank');
+    window.location.href = whatsappUrl;
   };
 
   return (

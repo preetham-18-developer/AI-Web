@@ -90,7 +90,7 @@ Looking forward to it!`;
     
     // Automatically open WhatsApp on load!
     const timerWhatsapp = setTimeout(() => {
-      window.open(whatsappUrl, '_blank');
+      window.location.href = whatsappUrl;
     }, 1200);
 
     return () => {
