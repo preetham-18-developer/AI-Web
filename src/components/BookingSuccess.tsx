@@ -87,8 +87,17 @@ Looking forward to it!`;
   useEffect(() => {
     // Stagger the tick animation after circle draws
     const timer = setTimeout(() => setShowTick(true), 600);
-    return () => clearTimeout(timer);
-  }, []);
+    
+    // Automatically open WhatsApp on load!
+    const timerWhatsapp = setTimeout(() => {
+      window.open(whatsappUrl, '_blank');
+    }, 1200);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(timerWhatsapp);
+    };
+  }, [whatsappUrl]);
 
   return (
     <div className="min-h-screen bg-bg flex flex-col items-center justify-center p-4 py-16 relative overflow-hidden">
